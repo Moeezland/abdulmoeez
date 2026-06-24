@@ -41,7 +41,9 @@
 
         <li class="dropdown">
 
-            <a href="#">Evidence ▾</a>
+            <a href="javascript:void(0)" onclick="toggleEvidence()">
+    Evidence ▾
+</a>
 
             <ul class="dropdown-menu">
 
@@ -221,6 +223,23 @@ function toggleMenu() {
         .getElementById("mobileNav")
         .classList
         .toggle("show");
+}
+
+function toggleEvidence() {
+
+    const dropdown =
+        document.querySelector(".dropdown-menu");
+
+    if (dropdown.style.display === "block") {
+
+        dropdown.style.display = "none";
+
+    } else {
+
+        dropdown.style.display = "block";
+
+    }
+
 }
 
 </script>
