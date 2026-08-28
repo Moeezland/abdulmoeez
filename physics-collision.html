@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Collision Simulator</title>
+
+<style>
+/* Background */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: radial-gradient(circle at top, #1a1a1a, #0d0d0d);
+  color: white;
+}
+
+/* Main container */
+.container {
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 25px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 20px;
+  box-shadow: 0 0 30px rgba(0,0,0,0.6);
+  backdrop-filter: blur(10px);
+}
+
+/* Title */
+h2 {
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+/* Controls layout */
+.controls {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+/* Slider rows */
+.controls label {
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+
+/* Sliders */
+input[type="range"] {
+  width: 100%;
+  appearance: none;
+  height: 6px;
+  border-radius: 5px;
+  background: #333;
+  outline: none;
+}
+
+/* Slider thumb */
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid #111;
+  box-shadow: 0 0 8px rgba(255,255,255,0.2);
+}
+
+/* Ball colors */
+#v1::-webkit-slider-thumb {
+  background: cyan;
+}
+#v2::-webkit-slider-thumb {
+  background: orange;
+}
+
+#m1::-webkit-slider-thumb {
+  background: #00ffcc; /* teal */
+}
+
+#m2::-webkit-slider-thumb {
+  background: #ffaa00; /* orange-yellow */
+}
+
+/* Value text */
+span {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* Button */
+button {
+  margin-top: 15px;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
+/* Canvas */
+canvas {
+  width: 100%;
+  border-radius: 15px;
+  border: 2px solid #333;
+  background: #111;
+}
+
+.credits {
+  margin-top: 25px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  text-align: center;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.credits strong {
+  color: #00c6ff;
+}
+
+.credits a {
+  color: #aaa;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.credits a:hover {
+  color: #00c6ff;
+}
+
+input[type="range"] {
+  cursor: pointer;
+}
+
+.container {
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+#m1::-moz-range-thumb {
+  background: #00ffcc;
+  border: none;
+  border-radius: 50%;
+}
+
+#m2::-moz-range-thumb {
+  background: #ffaa00;
+  border: none;
+  border-radius: 50%;
+}
+
+#pauseBtn {
+  background: linear-gradient(135deg, #ff4d4d, #b30000);
+}
+
+#pauseBtn:hover {
+  transform: scale(1.05);
+}
+
+.momentum {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.05);
+  text-align: center;
+  font-size: 14px;
+}
+
+.momentum strong {
+  color: #00ffcc;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+  <h2>⚡ 2 Ball Collision Simulator</h2>
+
+  <div class="controls">
+
+<label>Ball 1 Mass</label>
+<input type="range" id="m1" min="0.5" max="10" step="0.1" value="1" oninput="updateMass()">
+<span id="m1Display">1.0</span>
+
+<label>Ball 2 Mass</label>
+<input type="range" id="m2" min="0.5" max="10" step="0.1" value="1" oninput="updateMass()">
+<span id="m2Display">1.0</span>
+
+<label>Ball 1 Velocity</label>
+<input type="range" id="v1" min="-20" max="20" step="0.1" value="2" oninput="updateVelocity()">
+<span id="v1Display">2</span>
+
+<label>Ball 2 Velocity</label>
+<input type="range" id="v2" min="-20" max="20" step="0.1" value="-2" oninput="updateVelocity()">
+<span id="v2Display">-2</span>
+
+<button onclick="reset()">Reset</button>
+<button id="pauseBtn" onclick="togglePause()">Pause</button>
+
+  </div>
+
+  <canvas id="canvas" width="600" height="200"></canvas>
+
+<div class="momentum">
+  <p>Ball 1 Momentum: <span id="p1">0</span></p>
+  <p>Ball 2 Momentum: <span id="p2">0</span></p>
+  <p><strong>Total Momentum: <span id="ptotal">0</span></strong></p>
+</div>
+
+<div class="credits">
+  <p>Built with ❤️ for 🌍 by <strong>Abdul Moeez</strong></p>
+  <p>📧 <a href="mailto:abdulmoeez.ksa@gmail.com">abdulmoeez.ksa@gmail.com</a></p>
+  <p>📞 <a href="tel:+923367779327">+92 336 7779327</a></p>
+</div>
+
+</div>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+let paused = false;
+let ball1, ball2;
+let collided = false;
+const MAX_SPEED = 20;
+
+// Create balls
+function reset() {
+  collided = false;
+
+  ball1 = {
+    x: 150,
+    y: 100,
+    radius: 20,
+    mass: parseFloat(document.getElementById("m1").value) || 1,
+    velocity: parseFloat(document.getElementById("v1").value) || 0,
+    color: "cyan"
+  };
+
+  ball2 = {
+    x: 450,
+    y: 100,
+    radius: 20,
+    mass: parseFloat(document.getElementById("m2").value) || 1,
+    velocity: parseFloat(document.getElementById("v2").value) || 0,
+    color: "orange"
+  };
+
+ball1.radius = 15 + ball1.mass * 2;
+ball2.radius = 15 + ball2.mass * 2;
+
+  // ✅ ADD THIS
+  document.getElementById("v1Display").textContent = ball1.velocity.toFixed(1);
+  document.getElementById("v2Display").textContent = ball2.velocity.toFixed(1);
+
+document.getElementById("m1Display").textContent = ball1.mass.toFixed(1);
+document.getElementById("m2Display").textContent = ball2.mass.toFixed(1);
+
+}
+
+function togglePause() {
+  paused = !paused;
+
+  const btn = document.getElementById("pauseBtn");
+  btn.textContent = paused ? "Resume" : "Pause";
+}
+
+function updateVelocity() {
+  if (!ball1 || !ball2) return;
+
+  let v1 = parseFloat(document.getElementById("v1").value) || 0;
+  let v2 = parseFloat(document.getElementById("v2").value) || 0;
+
+  v1 = Math.max(-MAX_SPEED, Math.min(MAX_SPEED, v1));
+  v2 = Math.max(-MAX_SPEED, Math.min(MAX_SPEED, v2));
+
+  ball1.velocity = v1;
+  ball2.velocity = v2;
+
+  collided = false; // ✅ ADD THIS
+
+  document.getElementById("v1Display").textContent = v1.toFixed(1);
+  document.getElementById("v2Display").textContent = v2.toFixed(1);
+
+}
+
+// Draw ball
+function drawBall(ball) {
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+  ctx.fillStyle = ball.color;
+  ctx.fill();
+}
+
+function updateMomentum() {
+  if (!ball1 || !ball2) return;
+
+  let p1 = ball1.mass * ball1.velocity;
+  let p2 = ball2.mass * ball2.velocity;
+  let total = p1 + p2;
+
+  document.getElementById("p1").textContent = p1.toFixed(2);
+  document.getElementById("p2").textContent = p2.toFixed(2);
+  document.getElementById("ptotal").textContent = total.toFixed(2);
+}
+
+// Handle collision physics
+function handleCollision() {
+  let dx = ball1.x - ball2.x;
+  let distance = Math.abs(dx);
+  let minDist = ball1.radius + ball2.radius;
+
+  if (distance <= minDist && !collided) {
+    // Push balls apart (fix overlap)
+    let overlap = minDist - distance;
+    let direction = dx > 0 ? 1 : -1;
+
+    ball1.x += direction * overlap / 2;
+    ball2.x -= direction * overlap / 2;
+
+    // Real elastic collision formula
+    let m1 = ball1.mass;
+    let m2 = ball2.mass;
+
+    let u1 = ball1.velocity;
+    let u2 = ball2.velocity;
+
+    ball1.velocity = ((m1 - m2) / (m1 + m2)) * u1 + ((2 * m2) / (m1 + m2)) * u2;
+    ball2.velocity = ((2 * m1) / (m1 + m2)) * u1 + ((m2 - m1) / (m1 + m2)) * u2;
+
+    collided = true;
+  }
+
+  if (distance > minDist) {
+    collided = false;
+  }
+}
+
+function handleWalls(ball) {
+  // Left wall
+  if (ball.x - ball.radius <= 0) {
+    ball.x = ball.radius; // snap back inside
+    ball.velocity *= -1;
+  }
+
+  // Right wall
+  if (ball.x + ball.radius >= canvas.width) {
+    ball.x = canvas.width - ball.radius; // snap back
+    ball.velocity *= -1;
+  }
+}
+
+function updateMass() {
+  if (!ball1 || !ball2) return;
+
+  let m1 = parseFloat(document.getElementById("m1").value) || 1;
+  let m2 = parseFloat(document.getElementById("m2").value) || 1;
+
+  ball1.mass = m1;
+  ball2.mass = m2;
+
+  // 🔥 ADD THESE LINES HERE
+  ball1.radius = 15 + m1 * 2;
+  ball2.radius = 15 + m2 * 2;
+
+  // (optional but recommended — live display update)
+  document.getElementById("m1Display").textContent = m1.toFixed(1);
+  document.getElementById("m2Display").textContent = m2.toFixed(1);
+}
+
+// Update loop
+
+function update() {
+  if (paused) {
+    requestAnimationFrame(update);
+    return;
+  }
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  let steps = Math.max(
+    1,
+    Math.ceil(Math.max(Math.abs(ball1.velocity), Math.abs(ball2.velocity)))
+  );
+
+  for (let i = 0; i < steps; i++) {
+    ball1.x += ball1.velocity / steps;
+    handleWalls(ball1);
+
+    ball2.x += ball2.velocity / steps;
+    handleWalls(ball2);
+
+    handleCollision();
+  }
+
+  drawBall(ball1);
+  drawBall(ball2);
+
+updateMomentum();
+
+  requestAnimationFrame(update);
+}
+
+// Start
+reset();
+update();
+</script>
+
+</body>
+</html>
